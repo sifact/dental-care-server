@@ -64,8 +64,7 @@ async function run() {
             res.send(result);
         });
 
-        // read reviews
-
+        // read user specified reviews
         app.get("/reviews", async (req, res) => {
             let query = {};
 
@@ -75,6 +74,21 @@ async function run() {
                 };
             }
             console.log(query);
+            const cursor = reviewsCollection.find(query);
+            const reviews = await cursor.toArray();
+            res.send(reviews);
+        });
+
+        // read service specified reviews
+        app.get("/reviews/service", async (req, res) => {
+            let query = {};
+
+            if (req.query.service) {
+                query = {
+                    service: req.query.service,
+                };
+            }
+
             const cursor = reviewsCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
