@@ -45,6 +45,13 @@ async function run() {
             res.send(service);
         });
 
+        // create service data (post)
+        app.post("/add/service", async (req, res) => {
+            const service = req.body;
+            const result = await serviceCollection.insertOne(service);
+            res.send(result);
+        });
+
         // reviews api
 
         // create data (post)
