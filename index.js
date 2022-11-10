@@ -20,16 +20,6 @@ const client = new MongoClient(uri, {
 
 async function run() {
     try {
-        // service collection
-        const serviceCollection = client
-            .db("dental-care")
-            .collection("services");
-
-        // reviews collection
-        const reviewsCollection = client
-            .db("dental-care")
-            .collection("reviews");
-
         // service api (get/read data [get])
         // get data from database (all)
 
@@ -65,6 +55,7 @@ async function run() {
         });
 
         // read user specified reviews
+
         app.get("/reviews", async (req, res) => {
             let query = {};
 
@@ -73,7 +64,7 @@ async function run() {
                     email: req.query.email,
                 };
             }
-            console.log(query);
+
             const cursor = reviewsCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
@@ -92,6 +83,60 @@ async function run() {
             const cursor = reviewsCollection.find(query);
             const reviews = await cursor.toArray();
             res.send(reviews);
+        });
+
+        // delete specific review
+        app.delete("/reviews/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const query = { _id: ObjectId(id) };
+            const result = await reviewsCollection.deleteOne(query);
+            console.log(result);
+            res.send(result);
+        });
+
+        // service collection
+        const serviceCollection = client
+            .db("dental-care")
+            .collection("services");
+
+        // reviews collection
+        const reviewsCollection = client
+            .db("dental-care")
+            .collection("reviews");
+
+        // read specified reviews
+        app.get("/r/:id", async (req, res) => {
+            const id = req.params.id;
+
+            const query = { _id: ObjectId(id) };
+            const service = await reviewsCollection.findOne(query);
+            res.send(service);
+        });
+
+        // update data:
+        // receive data (in server) from client
+        app.put("/reviews/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const review = req.body;
+            console.log(review);
+            const option = { upsert: true };
+            const updateReview = {
+                $set: {
+                    userName: review.userName,
+
+                    email: review.email,
+                    review: review.review,
+                },
+            };
+            const result = await reviewsCollection.updateOne(
+                filter,
+                updateReview,
+                option
+            );
+            console.log(result);
+            res.send(result);
         });
     } finally {
     }
